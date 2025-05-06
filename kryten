@@ -36,8 +36,8 @@ showBanner(){
     echo "      ${random_funny}"
     echo -e "\033[0m========================================================="
     echo -e "\033[0m========================================================="
-    echo -e "\033[38;5;31m        Created by \033[1;38;5;32mJoshGreenTech\033[0m"
-    echo -e "\033[38;5;31m        https://github.com/joshgreen95\033[0m"
+    echo -e "\033[38;5;31m--|Created by \033[1;38;5;32m[JoshGreenTech]|--\033[0m"
+    echo -e "\033[38;5;31m--|https://github.com/joshgreen95|--\033[0m"
     echo -e "\033[0m========================================================="
     echo -e "\033[0m========================================================="
     echo -e "\033[38;5;105mKryten is online:\033[0m"
@@ -77,18 +77,17 @@ kryten () {
     local engagement_name="${1:-default_engagement}"
     engagement_name=$(echo "$engagement_name" | sed 's/[^a-zA-Z0-9.-]/_/g')
     local user_home="/home/$SUDO_USER"
-    local ctf_dir="$user_home/CTF/"
     local pentesting_dir="$user_home/Pentesting"
-    local URM_dir="$user_home/URM"
-    local output_dir="${URM_dir}/${engagement_name}"
-    local zip_file="${URM_dir}/archive/${engagement_name}.zip"
+    local Engagement_dir="$user_home/Engagements"
+    local output_dir="${Engagement_dir}/${engagement_name}"
+    local zip_file="${Engagement_dir}/archive/${engagement_name}.zip"
 
     checkRunningContainer "$engagement_name"
 
     # unzip if archive exists 
     if [ -f "$zip_file" ] && [ ! -d "$output_dir" ]; then
         echo "[+] Unzipping existing engagement: $zip_file"
-        unzip -q "$zip_file" -d "${URM_dir}/${engagement_name}" || echo "[!] Unzip failed"
+        unzip -q "$zip_file" -d "${Engagement_dir}/${engagement_name}" || echo "[!] Unzip failed"
     fi
 
     mkdir -p "$output_dir"
@@ -103,8 +102,6 @@ kryten () {
         -v "${output_dir}:/root/${engagement_name}" \
         -v "${HOME}/.zshrc:/root/.zshrc" \
         kryten  # Changed this to explicitly use :latest tag
-        # Uncomment for CTF mode:
-        # -v "${ctf_dir}:/root/ctf" \
     
     showBanner
     
