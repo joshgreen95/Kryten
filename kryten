@@ -6,7 +6,51 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+showBanner(){
+    kryten_funnies=(
+        "Well spin my nipple nuts and send me to Alaska."
+        "I'm almost Annoyed!"
+        "No Silicon Heaven? But where would all the calculators go?"
+        "With respect sir, you think Jesus was a hippie."
+        "Sir, are you absolutely sure? It does mean changing the bulb."
+        )
+
+    getRandomPhrase(){
+        local num_phrases=${#kryten_funnies[@]}
+        local random_index=$((RANDOM % num_phrases))
+        echo "${kryten_funnies[$random_index]}"
+    }
+
+    local random_funny=$(getRandomPhrase)
+    clear
+    echo -e "\033[38;5;105m"
+    echo "   ▄█   ▄█▄    ▄████████ ▄██   ▄       ███        ▄████████ ███▄▄▄▄   "
+    echo "  ███ ▄███▀   ███    ███ ███   ██▄ ▀█████████▄   ███    ███ ███▀▀▀██▄ "
+    echo "  ███▐██▀     ███    ███ ███▄▄▄███    ▀███▀▀██   ███    █▀  ███   ███ "
+    echo " ▄█████▀     ▄███▄▄▄▄██▀ ▀▀▀▀▀▀███     ███   ▀  ▄███▄▄▄     ███   ███ "
+    echo "▀▀█████▄    ▀▀███▀▀▀▀▀   ▄██   ███     ███     ▀▀███▀▀▀     ███   ███ "
+    echo "  ███▐██▄   ▀███████████ ███   ███     ███       ███    █▄  ███   ███ "
+    echo "  ███ ▀███▄   ███    ███ ███   ███     ███       ███    ███ ███   ███ "
+    echo "  ███   ▀█▀   ███    ███  ▀█████▀     ▄████▀     ██████████  ▀█   █▀  "
+    echo "  ▀           ███    ███                                               "
+    echo "      ${random_funny}"
+    echo -e "\033[0m========================================================="
+    echo -e "\033[0m========================================================="
+    echo -e "\033[38;5;31m        Created by \033[1;38;5;32mJoshGreenTech\033[0m"
+    echo -e "\033[38;5;0m        https://github.com/joshgreen95\033[0m"
+    echo -e "\033[0m========================================================="
+    echo -e "\033[0m========================================================="
+    echo -e "\033[38;5;105mKryten is online:\033[0m"
+    echo -e "\033[38;5;0m   ${engagement_name}\033[0m"
+    echo ""
+    echo -e "\033[38;5;32mTo access the container shell, run in another window:\033[0m"
+    echo -e "\033[1;38;5;105m   kryshell ${engagement_name}\033[0m"
+    echo ""
+    echo -e "\033[38;5;196mPress 'q' then Enter to stop exit\033[0m"
+}
+
 kryten () {
+    # Vars
     local engagement_name="${1:-default_engagement}"
     engagement_name=$(echo "$engagement_name" | sed 's/[^a-zA-Z0-9.-]/_/g')
     local user_home="/home/$SUDO_USER"
@@ -23,31 +67,53 @@ kryten () {
     fi
 
     mkdir -p "$output_dir"
-
-    docker run -it --rm \
+    
+    # Start the container in detached mode --rm flag makes it ephemeral
+    docker run -itd --rm \
         --name "kryten-${engagement_name}" \
         --network host \
         --cap-add=NET_ADMIN \
         --cap-add=NET_RAW \
-        -v "${pentesting_dir}":/root/pentesting \
-        -v "${output_dir}":"/root/${engagement_name}" \
-        -v ~/.zshrc:/root/.zshrc \
-        -v "${ctf_dir}":/root/ctf \
-        kryten
+        -v "${pentesting_dir}:/root/pentesting" \
+        -v "${output_dir}:/root/${engagement_name}" \
+        -v "${HOME}/.zshrc:/root/.zshrc" \
+        kryten  # Changed this to explicitly use :latest tag
+        # Uncomment for CTF mode:
+        # -v "${ctf_dir}:/root/ctf" \
+    
+    showBanner
+    
+    # Wait for kill command
+    while true; do
+        read -n1 -s key
+        if [[ $key == 'q' ]]; then
+            echo -e "Stopping container...\033[0m"
+            docker stop "kryten-${engagement_name}" >/dev/null
+            break
+        fi
+    done
 
-
-    #added to check if is empty, had some jank with empty olders.
-    if [ -z "$( ls -A '$output_dir' )" ]; then
-        echo "[?] Engagement File is Empty..."
-        sudo rm -rf "$output_dir"
+    # Check directory contents and zip
+    echo "[+] Preparing to clean up engagement files..."
+    if [ -z "$(ls -A "$output_dir")" ]; then
+        echo "[?] Engagement directory is empty"
     else
         echo "[+] Zipping engagement files..."
         (cd "$output_dir" && sudo zip -qr "$zip_file" .) && \
-        echo "[+] Backup created: $zip_file" && sudo rm -rf "$output_dir" || \
+        echo "[+] Backup created: $zip_file" || \
         echo "[!] Zip failed"
     fi
+    
+    # remove output dir
+    echo "[+] Cleaning up engagement directory..."
+    sudo rm -rf "$output_dir" && \
+    echo "[+] Cleanup complete" || \
+    echo "[!] Cleanup failed"
+    sleep 2
+    clear
 }
 
+### Error Handling on load 
 if [ $# -eq 0 ]; then
     echo -e "\033[33mNo engagement name specified\033[0m"
     read -p "Please enter engagement name (or Ctrl+C to cancel): " engagement_name
