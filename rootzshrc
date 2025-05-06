@@ -266,4 +266,5 @@ export URM='/root/URM'
 # Created by `pipx` on 2025-04-25 16:12:40
 export PATH="$PATH:/root/.local/bin"
 
-export PS1="%F{#D4FF77}kryten%f%F{#77D4FF}@%f%F{#FF77D4}starbug%f:%F{blue}%~%f \$ "
+export PS1="┌─[%F{#D4FF77}kryten%f%F{#77D4FF}@%f%F{#FF77D4}starbug%f]─[%F{blue}%~%f]
+└──╼ \$ "
