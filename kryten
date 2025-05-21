@@ -73,9 +73,9 @@ checkRunningContainer() {
 }
 
 kryten () {
-    # Vars
+    # Vars - convert engagement name to lowercase
     local engagement_name="${1:-default_engagement}"
-    engagement_name=$(echo "$engagement_name" | sed 's/[^a-zA-Z0-9.-]/_/g')
+    engagement_name=$(echo "$engagement_name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9.-]/_/g')
     local user_home="/home/$SUDO_USER"
     local pentesting_dir="$user_home/Pentesting"
     local Engagement_dir="$user_home/Engagements"
@@ -84,25 +84,33 @@ kryten () {
 
     checkRunningContainer "$engagement_name"
 
-    # unzip if archive exists 
-    if [ -f "$zip_file" ] && [ ! -d "$output_dir" ]; then
-        echo "[+] Unzipping existing engagement: $zip_file"
-        unzip -q "$zip_file" -d "${Engagement_dir}/${engagement_name}" || echo "[!] Unzip failed"
-    fi
+    # Prepare docker volume mounts
+    local docker_volumes=(
+        "-v \"${pentesting_dir}:/root/pentesting\""
+        "-v \"${HOME}/.zshrc:/root/.zshrc\""
+    )
 
-    mkdir -p "$output_dir"
+    # Special handling for CTF engagements
+    if [ "$engagement_name" = "ctf" ]; then
+        docker_volumes+=("-v \"${user_home}/ctf:/root/ctf\"")
+    else
+        # Normal
+        if [ -f "$zip_file" ] && [ ! -d "$output_dir" ]; then
+            echo "[+] Unzipping existing engagement: $zip_file"
+            unzip -q "$zip_file" -d "$output_dir" || echo "[!] Unzip failed"
+        fi
+        mkdir -p "$output_dir"
+        docker_volumes+=("-v \"${output_dir}:/root/${engagement_name}\"")
+    fi
     
     # Start the container in detached mode --rm flag makes it ephemeral
-    docker run -itd --rm \
+    eval docker run -itd --rm \
         --name "kryten-${engagement_name}" \
         --network host \
         --cap-add=NET_ADMIN \
         --cap-add=NET_RAW \
-        -v "${pentesting_dir}:/root/pentesting" \
-        -v "${output_dir}:/root/${engagement_name}" \
-        -v "${HOME}/.zshrc:/root/.zshrc" \
-        kryten  # Changed this to explicitly use :latest tag
-    
+        "${docker_volumes[@]}" \
+        kryten 
     showBanner
     
     # Wait for kill command
@@ -115,22 +123,24 @@ kryten () {
         fi
     done
 
-    # Check directory contents and zip
-    echo "[+] Preparing to clean up engagement files..."
-    if [ -z "$(ls -A "$output_dir")" ]; then
-        echo "[?] Engagement directory is empty"
-    else
-        echo "[+] Zipping engagement files..."
-        (cd "$output_dir" && sudo zip -qr "$zip_file" .) && \
-        echo "[+] Backup created: $zip_file" || \
-        echo "[!] Zip failed"
+    # Only perform cleanup for not ctf
+    if [ "$engagement_name" != "ctf" ]; then
+        echo "[+] Preparing to clean up engagement files..."
+        if [ -z "$(ls -A "$output_dir")" ]; then
+            echo "[?] Engagement directory is empty"
+        else
+            echo "[+] Zipping engagement files..."
+            (cd "$output_dir" && sudo zip -qr "$zip_file" .) && \
+            echo "[+] Backup created: $zip_file" || \
+            echo "[!] Zip failed"
+        fi
+        
+        echo "[+] Cleaning up engagement directory..."
+        sudo rm -rf "$output_dir" && \
+        echo "[+] Cleanup complete" || \
+        echo "[!] Cleanup failed"
     fi
     
-    # remove output dir
-    echo "[+] Cleaning up engagement directory..."
-    sudo rm -rf "$output_dir" && \
-    echo "[+] Cleanup complete" || \
-    echo "[!] Cleanup failed"
     sleep 2
     clear
 }
