@@ -22,7 +22,7 @@ showBanner(){
     }
 
     local random_funny=$(getRandomPhrase)
-    clear
+    
     echo -e "\033[38;5;105m"
     echo "   ▄█   ▄█▄    ▄████████ ▄██   ▄       ███        ▄████████ ███▄▄▄▄   "
     echo "  ███ ▄███▀   ███    ███ ███   ██▄ ▀█████████▄   ███    ███ ███▀▀▀██▄ "
@@ -91,18 +91,25 @@ kryten () {
     fi
 
     mkdir -p "$output_dir"
-    
+    mkdir -p "${output_dir}/notes"
+    chmod ugo+wrx "${output_dir}/notes"
+   
+    #foward x11
+    xhost +local:root
+
     # Start the container in detached mode --rm flag makes it ephemeral
     docker run -itd --rm \
         --name "kryten-${engagement_name}" \
         --network host \
         --cap-add=NET_ADMIN \
         --cap-add=NET_RAW \
+        -e DISPLAY=$DISPLAY \
+        -v '/tmp/.X11-unix':'/tmp/.X11-unix' \
         -v "${pentesting_dir}:/root/pentesting" \
         -v "${output_dir}:/root/${engagement_name}" \
         -v "${HOME}/.zshrc:/root/.zshrc" \
         kryten  # Changed this to explicitly use :latest tag
-    
+        
     showBanner
     
     # Wait for kill command
