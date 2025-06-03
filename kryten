@@ -6,6 +6,12 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+getRandomPhrase(){
+        local num_phrases=${#kryten_funnies[@]}
+        local random_index=$((RANDOM % num_phrases))
+        echo "${kryten_funnies[$random_index]}"
+}
+
 showBanner(){
     kryten_funnies=(
         "Well spin my nipple nuts and send me to Alaska."
@@ -15,11 +21,6 @@ showBanner(){
         "Sir, are you absolutely sure? It does mean changing the bulb."
         )
 
-    getRandomPhrase(){
-        local num_phrases=${#kryten_funnies[@]}
-        local random_index=$((RANDOM % num_phrases))
-        echo "${kryten_funnies[$random_index]}"
-    }
 
     local random_funny=$(getRandomPhrase)
     clear
@@ -82,6 +83,9 @@ kryten () {
     local output_dir="${Engagement_dir}/${engagement_name}"
     local zip_file="${Engagement_dir}/archive/${engagement_name}.zip"
 
+    # Enabling X11
+    sudo xhost +local:root
+    
     checkRunningContainer "$engagement_name"
 
     # Special handling for CTF engagements
@@ -96,6 +100,8 @@ kryten () {
             --network host \
             --cap-add=NET_ADMIN \
             --cap-add=NET_RAW \
+            -e DISPLAY=$DISPLAY \
+            -v /tmp/.X11-unix:/tmp/.X11-unix \
             -v "${pentesting_dir}:/root/pentesting" \
             -v "${HOME}/.zshrc:/root/.zshrc" \
             -v "${HOME}/ctf:/root/ctf" \
@@ -113,6 +119,8 @@ kryten () {
             --network host \
             --cap-add=NET_ADMIN \
             --cap-add=NET_RAW \
+            -e DISPLAY=$DISPLAY \
+            -v /tmp/.X11-unix:/tmp/.X11-unix \
             -v "${pentesting_dir}:/root/pentesting" \
             -v "${HOME}/.zshrc:/root/.zshrc" \
             -v "${output_dir}:/root/${engagement_name}" \
@@ -134,7 +142,7 @@ kryten () {
     # Own Everything
     echo 'Making user who ran this own their files again *eyeroll*'
     sudo chown -R ${SUDO_USER}:${SUDO_USER} ${user_home}
-    
+
     # Only perform cleanup for non-CTF engagements
     if [ "$engagement_name" != "ctf" ]; then
         echo "[+] Preparing to clean up engagement files..."

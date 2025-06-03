@@ -9,6 +9,7 @@ RUN apt update && apt -y install \
     wget \
     unzip \
     && apt clean \
+    && pipx install kerbrute\
     && rm -rf /var/lib/apt/lists/*
 
 VOLUME ["/root/.zshrc"]
