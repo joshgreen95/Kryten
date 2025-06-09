@@ -86,13 +86,18 @@ kryten () {
     # Enabling X11
     sudo xhost +local:root
     
+
+    #Copy over .zshrc config from this file. TODO IMPLIMENT FOLDER STRUCTURE POSSIBLY CONFIG FILE ###########################################
+    #Extract Directory
+    
+    
     checkRunningContainer "$engagement_name"
 
     # Special handling for CTF engagements
     if [ "$engagement_name" = "ctf" ]; then
         # Ensure CTF directory exists
-        mkdir -p "${HOME}/ctf"
-        echo "[+] Mounting CTF directory: ${HOME}/ctf to /root/ctf"
+        mkdir -p "${user_home}/ctf"
+        echo "[+] Mounting CTF directory: ${user_home}/ctf to /root/ctf"
         
         # Start container with CTF mount
         docker run -itd --rm \
@@ -104,7 +109,7 @@ kryten () {
             -v /tmp/.X11-unix:/tmp/.X11-unix \
             -v "${pentesting_dir}:/root/pentesting" \
             -v "${HOME}/.zshrc:/root/.zshrc" \
-            -v "${HOME}/ctf:/root/ctf" \
+            -v "${user_home}/ctf:/root/ctf" \
             kryten
     else
         # Normal engagement handling
@@ -140,8 +145,9 @@ kryten () {
     done
 
     # Own Everything
-    echo 'Making user who ran this own their files again *eyeroll*'
-    sudo chown -R ${SUDO_USER}:${SUDO_USER} ${user_home}
+    echo 'Making user who ran this own their files again--'
+    sudo chown -R ${SUDO_USER}:${SUDO_USER} ${pentesting_dir}
+    sudo chown -R ${SUDO_USER}:${SUDO_USER} ${output_dir}
 
     # Only perform cleanup for non-CTF engagements
     if [ "$engagement_name" != "ctf" ]; then

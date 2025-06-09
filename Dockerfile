@@ -6,10 +6,12 @@ RUN apt update && apt -y install \
     zsh-syntax-highlighting \
     zsh-autosuggestions \
     bloodyad \
+    eyewitness \
     wget \
     unzip \
     && apt clean \
-    && pipx install kerbrute\
+    && pipx install kerbrute \
+    && pip3 install droopescan --break-system-packages
     && rm -rf /var/lib/apt/lists/*
 
 VOLUME ["/root/.zshrc"]
