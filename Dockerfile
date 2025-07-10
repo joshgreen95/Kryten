@@ -12,6 +12,7 @@ RUN apt update && apt -y install \
     unzip \
     golang \
     smtp-user-enum \
+    pciutils \
     && CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@latest \
     && apt clean \
     && pipx install kerbrute \
