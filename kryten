@@ -110,6 +110,7 @@ kryten () {
             -v "${pentesting_dir}:/root/pentesting" \
             -v "${HOME}/.zshrc:/root/.zshrc" \
             -v "${user_home}/ctf:/root/ctf" \
+            -v "/etc/hosts:/etc/hosts:ro" \
             kryten
     else
         # Normal engagement handling
@@ -129,6 +130,7 @@ kryten () {
             -v "${pentesting_dir}:/root/pentesting" \
             -v "${HOME}/.zshrc:/root/.zshrc" \
             -v "${output_dir}:/root/${engagement_name}" \
+            -v "/etc/hosts:/etc/hosts:ro" \
             kryten
     fi
     
@@ -149,7 +151,8 @@ kryten () {
     sudo chown -R ${SUDO_USER}:${SUDO_USER} ${pentesting_dir}
     sudo chown -R ${SUDO_USER}:${SUDO_USER} ${output_dir}
 
-    # Only perform cleanup for non-CTF engagements
+    # Only perform cleanup for non-CTF en
+    gagements
     if [ "$engagement_name" != "ctf" ]; then
         echo "[+] Preparing to clean up engagement files..."
         if [ -z "$(ls -A "$output_dir")" ]; then
