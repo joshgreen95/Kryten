@@ -122,7 +122,7 @@ kryten () {
         
         docker run -itd --rm \
             --name "kryten-${engagement_name}" \
-            --network host \
+            --network custom-net \
             --cap-add=NET_ADMIN \
             --cap-add=NET_RAW \
             -e DISPLAY=$DISPLAY \

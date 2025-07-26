@@ -15,12 +15,17 @@ RUN apt update && apt -y install \
     pciutils \
     sipcalc \
     iputils-ping \
-    npm \
+    feroxbuster \
+    oscanner \
+    redis-tools \
+    sipvicious \
+    tnscmd10g \
+    krb5-user \
     && CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@latest \
     && apt clean \
-    && npm install -g retire-site-scanner \
     && pipx install kerbrute \
     && pip3 install droopescan --break-system-packages \
+    && pip3 install git+https://github.com/Tib3rius/AutoRecon.git --break-system-packages --ignore-installed \
     && rm -rf /var/lib/apt/lists/*
 
 VOLUME ["/root/.zshrc"]
