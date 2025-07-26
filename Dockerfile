@@ -20,7 +20,6 @@ RUN apt update && apt -y install \
     redis-tools \
     sipvicious \
     tnscmd10g \
-    krb5-user \
     && CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@latest \
     && apt clean \
     && pipx install kerbrute \
@@ -28,7 +27,12 @@ RUN apt update && apt -y install \
     && pip3 install git+https://github.com/Tib3rius/AutoRecon.git --break-system-packages --ignore-installed \
     && rm -rf /var/lib/apt/lists/*
 
+#krb5-user jank
+RUN echo "krb5-config krb5-config/default_realm string LOCAL" | debconf-set-selections && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y krb5-user
+
 VOLUME ["/root/.zshrc"]
+
 
 WORKDIR /root
 CMD ["zsh"]
