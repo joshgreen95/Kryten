@@ -120,6 +120,10 @@ kryten () {
         fi
         mkdir -p "$output_dir"
         
+        #In a subshell run chown every minute?
+        
+
+
         docker run -itd --rm \
             --name "kryten-${engagement_name}" \
             --network custom-net \
@@ -131,6 +135,7 @@ kryten () {
             -v "${HOME}/.zshrc:/root/.zshrc" \
             -v "${output_dir}:/root/${engagement_name}" \
             -v "/etc/hosts:/etc/hosts:ro" \
+            --privileged \
             kryten
     fi
     
