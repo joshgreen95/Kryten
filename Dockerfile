@@ -46,7 +46,7 @@ RUN CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@lates
 
 # Install Python packages into the virtualenv (no system-wide flags)
 # Use the venv pip directly to avoid modifying system packages
-RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf \
+RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf websockets \
  && $VENV_PATH/bin/pip install --no-cache-dir git+https://github.com/Tib3rius/AutoRecon.git
 
 # run nuclei template update (nuclei installed via go)
