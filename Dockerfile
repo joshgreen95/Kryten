@@ -15,6 +15,7 @@ RUN apt-get update && \
       eyewitness \
       wget \
       unzip \
+      chromium \
       golang \
       smtp-user-enum \
       pciutils \
