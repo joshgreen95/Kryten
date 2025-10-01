@@ -270,4 +270,5 @@ export PATH="/root/go/bin:$PATH"
 export PATH="$TOOLS:$PATH"
 
 
-export PS1="%F{#D4FF77}kryten%f%F{#77D4FF}@%f%F{#FF77D4}starbug%f:%F{blue}%~%f \$ "
+export PS1="┌─[%F{#D4FF77}kryten%f%F{#77D4FF}Ω%f%F{#FF77D4}$HOSTNAME%f]─[%F{blue}%~%f]
+└─╼\$ "
