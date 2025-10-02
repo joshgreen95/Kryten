@@ -1,7 +1,6 @@
 #!/bin/bash
 ### TODO: ADD CHECK FOR X11 FLAGS
-### TODO: MAKE HOSTNAME ENGAGEMENT NAME. NOT SURE HOW WE DO THIS    
-
+### TODO: MAKE 
 # Check for root privs
 if [ "$(id -u)" -ne 0 ]; then
     echo "Error: kryten requires sudo privileges" >&2
@@ -144,9 +143,10 @@ kryten () {
             -e DISPLAY=$DISPLAY \
             -v /tmp/.X11-unix:/tmp/.X11-unix \
             -v "${pentesting_dir}:/root/pentesting" \
-            -v "${HOME}/.zshrc:/root/.zshrc" \
+            -v "${script_dir}/.config/.zshrc:/root/.zshrc" \
             -v "${output_dir}:/root/${engagement_name}" \
             -v "/etc/hosts:/etc/hosts:ro" \
+            --hostname "${engagement_name}" \
             --privileged \
             kryten
     fi

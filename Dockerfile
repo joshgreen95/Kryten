@@ -11,7 +11,6 @@ RUN apt-get update && \
       zsh \
       zsh-syntax-highlighting \
       zsh-autosuggestions \
-      bloodyad \
       eyewitness \
       wget \
       unzip \
@@ -35,6 +34,7 @@ RUN apt-get update && \
       ca-certificates \
       tnscmd10g \
       testssl.sh \
+      freerdp3-x11 \
     && apt-get --fix-broken -y install \
     && rm -rf /var/lib/apt/lists/*
 
@@ -49,8 +49,8 @@ RUN CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@lates
 
 # Install Python packages into the virtualenv (no system-wide flags)
 # Use the venv pip directly to avoid modifying system packages
-RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf websockets wappalyzer \
- && $VENV_PATH/bin/pip install --no-cache-dir git+https://github.com/Tib3rius/AutoRecon.git
+RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf websockets wappalyzer bloodyAD \
+ && $VENV_PATH/bin/pip install --no-cache-dir git+https://github.com/Tib3rius/AutoRecon.git \ 
 
 # run nuclei template update (nuclei installed via go)
 RUN /root/go/bin/nuclei -ut || true

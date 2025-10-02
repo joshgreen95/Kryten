@@ -258,17 +258,14 @@ fi
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 #file shortcuts 
-export SL="/root/Pentesting/SecLists"
-export TOOLS='/root/Pentesting/tools'
-export VPN='/root/Pentesting/vpn'
-export URM='/root/URM'
+export SL="/root/pentesting/wordlists/SecLists"
+export WL="/root/pentesting/wordlists"
+export TOOLS='/root/pentesting/tools'
+export VPN='/root/pentesting/vpn'
 
 # Created by `pipx` on 2025-04-25 16:12:40
 export PATH="$PATH:/root/.local/bin"
-
-export PATH="/root/go/bin:$PATH"
-export PATH="$TOOLS:$PATH"
-
-
-export PS1="┌─[%F{#D4FF77}kryten%f%F{#77D4FF}Ω%f%F{#FF77D4}$HOSTNAME%f]─[%F{blue}%~%f]
+export PATH="$PATH:/root/.local/bin"
+export PATH="$PATH:/root/go/bin"
+export PS1="┌─[%F{#D4FF77}kryten%f%F{#77D4FF}Ω%f%F{#FF77D4}$HOST%f]─[%F{blue}%~%f]
 └─╼\$ "
