@@ -88,20 +88,16 @@ kryten () {
     
     local user_home="/home/$SUDO_USER"
     local pentesting_dir="$user_home/Pentesting"
-    local Engagement_dir="$user_home/Engagements"
-    local output_dir="${Engagement_dir}/${engagement_name}"
+    local engagement_dir="$user_home/Engagements"
+    local output_dir="${engagement_dir}/${engagement_name}"
     
     local script_dir=$(dirname $0)
-    local zip_file="${Engagement_dir}/archive/${engagement_name}.zip"
-    local x11_enabled=$
+    local zip_file="${engagement_dir}/archive/${engagement_name}.zip"
 
     # Enabling X11 TODO MAKE THIS A VARIABLE TO TURN ON AND OFF? MAYBE DEFAULT ON IDK #############################
 
     sudo xhost +local:root
-    
-    #Copy over .zshrc config from this file. TODO IMPLIMENT FOLDER STRUCTURE POSSIBLY CONFIG FILE ###########################################
-    #Extract Directory
-    
+        
     checkRunningContainer "$engagement_name"
 
     # Special handling for CTF engagements
@@ -113,7 +109,7 @@ kryten () {
         # Start container with CTF mount
         docker run -itd --rm \
             --name "kryten-${engagement_name}" \
-            --network host \
+            --net=host \
             --cap-add=NET_ADMIN \
             --cap-add=NET_RAW \
             -e DISPLAY=$DISPLAY \
@@ -137,7 +133,7 @@ kryten () {
 
         docker run -itd --rm \
             --name "kryten-${engagement_name}" \
-            --network custom-net \
+            --net=host \
             --cap-add=NET_ADMIN \
             --cap-add=NET_RAW \
             -e DISPLAY=$DISPLAY \
@@ -146,6 +142,7 @@ kryten () {
             -v "${script_dir}/.config/.zshrc:/root/.zshrc" \
             -v "${output_dir}:/root/${engagement_name}" \
             -v "/etc/hosts:/etc/hosts:ro" \
+            -p 8080:8080 \
             --hostname "${engagement_name}" \
             --privileged \
             kryten
@@ -163,10 +160,10 @@ kryten () {
         fi
     done
 
-    # Only perform cleanup for non-CTF en
-    gagements
+    # Only perform cleanup for non-CTF engagements
     if [ "$engagement_name" != "ctf" ]; then
         sudo chown -R ${SUDO_USER}:${SUDO_USER} ${pentesting_dir}
+        sudo chown -R ${SUDO_USER}:${SUDO_USER} ${engagement_dir}
         echo "[+] Preparing to clean up engagement files..."
         if [ -z "$(ls -A "$output_dir")" ]; then
             echo "[?] Engagement directory is empty"
