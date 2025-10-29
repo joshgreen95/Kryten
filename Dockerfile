@@ -36,6 +36,7 @@ RUN apt-get update && \
       testssl.sh \
       nodejs \
       npm \
+      parallel \
     && apt-get --fix-broken -y install \
     && rm -rf /var/lib/apt/lists/*
 
