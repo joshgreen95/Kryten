@@ -14,9 +14,11 @@ RUN apt-get update && \
       eyewitness \
       wget \
       unzip \
+      ssh-audit \
       chromium \
       golang \
       smtp-user-enum \
+      coercer \
       pciutils \
       sipcalc \
       iputils-ping \
@@ -41,14 +43,14 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m venv $VENV_PATH && \
-    $VENV_PATH/bin/python -m pip install --upgrade pip setuptools wheel
+    $VENV_PATH/bin/python -m pip install --upgrade pip setuptools wheel googlesearch datrie fake-useragent
 
 ENV CGO_ENABLED=1
 RUN CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@latest && \
     CGO_ENABLED=1 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
 
 # Install Python packages into the virtualenv (no system-wide flags)
-RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf websockets wappalyzer bloodyAD && \
+RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder && \
     $VENV_PATH/bin/pip install --no-cache-dir git+https://github.com/Tib3rius/AutoRecon.git
 
 # run nuclei template update (nuclei installed via go)

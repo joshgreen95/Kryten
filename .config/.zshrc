@@ -262,6 +262,8 @@ export SL="/root/pentesting/wordlists/SecLists"
 export WL="/root/pentesting/wordlists"
 export TOOLS='/root/pentesting/tools'
 export VPN='/root/pentesting/vpn'
+export CYBER='/root/pentesting/tools/Cyber'
+export AS='/root/pentesting/tools/Cyber/abriska-scripts'
 
 # Created by `pipx` on 2025-04-25 16:12:40
 export PATH="$PATH:/root/.local/bin"
