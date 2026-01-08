@@ -39,18 +39,19 @@ RUN apt-get update && \
       nodejs \
       npm \
       parallel \
+      xclip \
     && apt-get --fix-broken -y install \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m venv $VENV_PATH && \
-    $VENV_PATH/bin/python -m pip install --upgrade pip setuptools wheel googlesearch datrie fake-useragent
+    $VENV_PATH/bin/python -m pip install --upgrade pip 
 
 ENV CGO_ENABLED=1
 RUN CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@latest && \
     CGO_ENABLED=1 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
 
 # Install Python packages into the virtualenv (no system-wide flags)
-RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder && \
+RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder setuptools wheel && \
     $VENV_PATH/bin/pip install --no-cache-dir git+https://github.com/Tib3rius/AutoRecon.git
 
 # run nuclei template update (nuclei installed via go)
@@ -61,6 +62,8 @@ RUN npm config set progress false && \
     npm config set audit false && \
     npm config set fund false && \
     npm install -g --no-audit --no-fund --unsafe-perm retire-site-scanner
+
+RUN updatedb
 
 WORKDIR /root
 CMD ["zsh"]

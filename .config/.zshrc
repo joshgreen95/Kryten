@@ -265,6 +265,10 @@ export VPN='/root/pentesting/vpn'
 export CYBER='/root/pentesting/tools/Cyber'
 export AS='/root/pentesting/tools/Cyber/abriska-scripts'
 
+# Aliases
+alias xclipc='xclip -selection clipboard'
+alias xclipp='xclip -selection primary'
+
 # Created by `pipx` on 2025-04-25 16:12:40
 export PATH="$PATH:/root/.local/bin"
 export PATH="$PATH:/root/.local/bin"
