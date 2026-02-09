@@ -40,6 +40,7 @@ RUN apt-get update && \
       npm \
       parallel \
       xclip \
+      mandb \
     && apt-get --fix-broken -y install \
     && rm -rf /var/lib/apt/lists/*
 
@@ -48,7 +49,8 @@ RUN python3 -m venv $VENV_PATH && \
 
 ENV CGO_ENABLED=1
 RUN CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@latest && \
-    CGO_ENABLED=1 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+    CGO_ENABLED=1 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && \
+    CGO_ENABLED=1 go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
 
 # Install Python packages into the virtualenv (no system-wide flags)
 RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder setuptools wheel && \
