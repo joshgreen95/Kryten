@@ -258,12 +258,12 @@ fi
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 #file shortcuts 
-export SL="/root/pentesting/wordlists/SecLists"
-export WL="/root/pentesting/wordlists"
-export TOOLS='/root/pentesting/tools'
-export VPN='/root/pentesting/vpn'
-export CYBER='/root/pentesting/tools/Cyber'
-export AS='/root/pentesting/tools/Cyber/abriska-scripts'
+export SL="~/pentesting/wordlists/SecLists"
+export WL="~/pentesting/wordlists"
+export TOOLS='~/pentesting/tools'
+export VPN='~/pentesting/vpn'
+export CYBER='~/pentesting/tools/Cyber'
+export AS='~/pentesting/tools/Cyber/abriska-scripts'
 
 # Aliases
 alias xclipc='xclip -selection clipboard'

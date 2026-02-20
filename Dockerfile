@@ -2,8 +2,10 @@ FROM kalilinux/kali-rolling
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV VENV_PATH=/opt/venv
-ENV PATH=$VENV_PATH/bin:$PATH
+ENV GOBIN=/usr/local/bin
+ENV PATH=$VENV_PATH/bin:$GOBIN:$PATH
 ENV NPM_CONFIG_UNSAFE_PERM=true
+ENV CGO_ENABLED=1
 
 RUN apt-get update && \
     apt-get -y install --no-install-recommends \
@@ -40,30 +42,35 @@ RUN apt-get update && \
       npm \
       parallel \
       xclip \
-      mandb \
+      man-db \
+      locate \
+      less \
     && apt-get --fix-broken -y install \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m venv $VENV_PATH && \
-    $VENV_PATH/bin/python -m pip install --upgrade pip 
+    python -m pip install --upgrade pip
 
-ENV CGO_ENABLED=1
 RUN CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@latest && \
     CGO_ENABLED=1 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && \
     CGO_ENABLED=1 go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
 
 # Install Python packages into the virtualenv (no system-wide flags)
-RUN $VENV_PATH/bin/pip install --no-cache-dir jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder setuptools wheel && \
-    $VENV_PATH/bin/pip install --no-cache-dir git+https://github.com/Tib3rius/AutoRecon.git
+RUN pip install --no-cache-dir \
+      jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder setuptools wheel && \
+    pip install --no-cache-dir \
+      git+https://github.com/Tib3rius/AutoRecon.git
 
 # run nuclei template update (nuclei installed via go)
-RUN /root/go/bin/nuclei -ut || true
+RUN nuclei -ut || true
 
 # Configure npm then install retire-site-scanner
 RUN npm config set progress false && \
     npm config set audit false && \
     npm config set fund false && \
     npm install -g --no-audit --no-fund --unsafe-perm retire-site-scanner
+
+RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
 
 RUN updatedb
 

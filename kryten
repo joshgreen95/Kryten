@@ -1,28 +1,31 @@
 #!/bin/bash
 ### TODO: ADD CHECK FOR X11 FLAGS
-### TODO: MAKE 
+### TODO: MAKE
+
 # Check for root privs
 if [ "$(id -u)" -ne 0 ]; then
     echo "Error: kryten requires sudo privileges" >&2
     exit 1
 fi
 
-getRandomPhrase(){
-        local num_phrases=${#kryten_funnies[@]}
-        local random_index=$((RANDOM % num_phrases))
-        echo "${kryten_funnies[$random_index]}"
+getRandomPhrase() {
+    local num_phrases=${#kryten_funnies[@]}
+    local random_index=$((RANDOM % num_phrases))
+    echo "${kryten_funnies[$random_index]}"
 }
 
-showBanner(){
+showBanner() {
     kryten_funnies=(
         "Well spin my nipple nuts and send me to Alaska."
         "I'm almost Annoyed!"
         "No Silicon Heaven? But where would all the calculators go?"
         "With respect sir, you think Jesus was a hippie."
         "Sir, are you absolutely sure? It does mean changing the bulb."
-        )
+    )
 
-    local random_funny=$(getRandomPhrase)
+    local random_funny
+    random_funny=$(getRandomPhrase)
+
     clear
     echo -e "\033[38;5;105m"
     echo "   ▄█   ▄█▄    ▄████████ ▄██   ▄       ███        ▄████████ ███▄▄▄▄   "
@@ -53,66 +56,63 @@ showBanner(){
 checkRunningContainer() {
     local engagement_name="$1"
     local container_name="kryten-${engagement_name}"
-    
+
     # Check if container exists and is running
     if docker ps --format '{{.Names}}' | grep -q "^${container_name}$"; then
         echo -e "\033[31mError: A kryten container named '${container_name}' is already running\033[0m" >&2
         echo -e "\033[33mYou can access it with: kryshell ${engagement_name}\033[0m" >&2
         echo -e "\033[33mOr stop it with: docker stop ${container_name}\033[0m" >&2
         read -p "Do you want to stop the container now? (y/N) " answer
-        # Check if user wants to stop container now.
-        if [[ "${answer}" == "y" || "$answer" == "Y" ]]; then
-            docker stop ${container_name}
+        if [[ "${answer}" == "y" || "${answer}" == "Y" ]]; then
+            docker stop "${container_name}"
             return
         fi
         exit 1
     fi
-    
+
     # Check if container exists but is stopped
     if docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
         echo -e "\033[33mWarning: A stopped kryten container named '${container_name}' exists\033[0m" >&2
         read -p "Do you want to remove it and continue? (y/N) " answer
-        if [[ "$answer" != "y" || "$answer" != "Y" ]]; then
-            # Remove docker container if it already exists.
-            docker rmi --force ${container_name}
+        if [[ "${answer}" != "y" && "${answer}" != "Y" ]]; then
+            docker rmi --force "${container_name}"
             exit 1
         fi
-        docker rm "$container_name" >/dev/null
+        docker rm "${container_name}" >/dev/null
     fi
 }
 
-kryten () {
-    # Vars - convert engagement name to lowercase (stop getting confused with )
+kryten() {
+    # Vars - convert engagement name to lowercase
     local engagement_name="${1:-default_engagement}"
     engagement_name=$(echo "$engagement_name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9.-]/_/g')
-    
+
     local user_home="/home/$SUDO_USER"
     local pentesting_dir="$user_home/Pentesting"
     local engagement_dir="$user_home/Engagements"
     local output_dir="${engagement_dir}/${engagement_name}"
-    
-    local script_dir=$(dirname $0)
+
+    local script_dir
+    script_dir=$(dirname "$0")
+
     local zip_file="${engagement_dir}/archive/${engagement_name}.zip"
 
-    # Enabling X11 TODO MAKE THIS A VARIABLE TO TURN ON AND OFF? MAYBE DEFAULT ON IDK #############################
-
+    # Enabling X11 TODO: make this a variable to turn on and off?
     sudo xhost +local:root
-        
+
     checkRunningContainer "$engagement_name"
 
     # Special handling for CTF engagements
     if [ "$engagement_name" = "ctf" ]; then
-        # Ensure CTF directory exists
         mkdir -p "${user_home}/ctf"
         echo "[+] Mounting CTF directory: ${user_home}/ctf to /root/ctf"
-        
-        # Start container with CTF mount
+
         docker run -itd --rm \
             --name "kryten-${engagement_name}" \
             --net=host \
             --cap-add=NET_ADMIN \
             --cap-add=NET_RAW \
-            -e DISPLAY=$DISPLAY \
+            -e DISPLAY="$DISPLAY" \
             -v /tmp/.X11-unix:/tmp/.X11-unix \
             -v "${pentesting_dir}:/root/pentesting" \
             -v "${script_dir}/.config/.zshrc:/root/.zshrc" \
@@ -125,10 +125,10 @@ kryten () {
         if [ -f "$zip_file" ] && [ ! -d "$output_dir" ]; then
             echo "[+] Unzipping existing engagement: $zip_file"
             unzip -q "$zip_file" -d "$output_dir" || echo "[!] Unzip failed"
-            # Make root user own engagement file 
             echo -e "[+] Owning "
-            sudo chown -R ${SUDO_USER}:${SUDO_USER} ${pentesting_dir}
+            sudo chown -R "${SUDO_USER}:${SUDO_USER}" "${output_dir}"
         fi
+
         mkdir -p "$output_dir"
 
         docker run -itd --rm \
@@ -136,7 +136,7 @@ kryten () {
             --net=host \
             --cap-add=NET_ADMIN \
             --cap-add=NET_RAW \
-            -e DISPLAY=$DISPLAY \
+            -e DISPLAY="$DISPLAY" \
             -v /tmp/.X11-unix:/tmp/.X11-unix \
             -v "${pentesting_dir}:/root/pentesting" \
             -v "${script_dir}/.config/.zshrc:/root/.zshrc" \
@@ -147,13 +147,13 @@ kryten () {
             --privileged \
             kryten
     fi
-    
+
     showBanner
-    
+
     # Wait for kill command
     while true; do
         read -n1 -s key
-        if [[ $key == 'q' ]]; then
+        if [[ "$key" == "q" ]]; then
             echo -e "Stopping container...\033[0m"
             docker stop "kryten-${engagement_name}" >/dev/null
             break
@@ -162,30 +162,30 @@ kryten () {
 
     # Only perform cleanup for non-CTF engagements
     if [ "$engagement_name" != "ctf" ]; then
-        sudo chown -R ${SUDO_USER}:${SUDO_USER} ${pentesting_dir}
-        sudo chown -R ${SUDO_USER}:${SUDO_USER} ${engagement_dir}
+        sudo chown -R "${SUDO_USER}:${SUDO_USER}" "${pentesting_dir}"
+        sudo chown -R "${SUDO_USER}:${SUDO_USER}" "${engagement_dir}"
+
         echo "[+] Preparing to clean up engagement files..."
         if [ -z "$(ls -A "$output_dir")" ]; then
             echo "[?] Engagement directory is empty"
         else
             echo "[+] Zipping engagement files..."
             (cd "$output_dir" && sudo zip -qr "$zip_file" .) && \
-            #Has to be here 
-            echo "[+] Backup created: $zip_file" || \
-            echo "[!] Zip failed"
+                echo "[+] Backup created: $zip_file" || \
+                echo "[!] Zip failed"
         fi
-        
+
         echo "[+] Cleaning up engagement directory..."
         sudo rm -rf "$output_dir" && \
-        echo "[+] Cleanup complete" || \
-        echo "[!] Cleanup failed"
+            echo "[+] Cleanup complete" || \
+            echo "[!] Cleanup failed"
     fi
-    
+
     sleep 2
     clear
 }
 
-### Error Handling on load 
+# Error handling on load
 if [ $# -eq 0 ]; then
     echo -e "\033[33mNo engagement name specified\033[0m"
     read -p "Please enter engagement name (or Ctrl+C to cancel): " engagement_name
