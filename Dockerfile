@@ -1,12 +1,10 @@
 FROM kalilinux/kali-rolling
-
 ENV DEBIAN_FRONTEND=noninteractive
 ENV VENV_PATH=/opt/venv
 ENV GOBIN=/usr/local/bin
 ENV PATH=$VENV_PATH/bin:$GOBIN:$PATH
 ENV NPM_CONFIG_UNSAFE_PERM=true
 ENV CGO_ENABLED=1
-
 RUN apt-get update && \
     apt-get -y install --no-install-recommends \
       kali-linux-headless \
@@ -32,6 +30,7 @@ RUN apt-get update && \
       krb5-user \
       freerdp3-x11 \
       python3 \
+      python3-full \
       python3-venv \
       python3-pip \
       build-essential \
@@ -47,32 +46,22 @@ RUN apt-get update && \
       less \
     && apt-get --fix-broken -y install \
     && rm -rf /var/lib/apt/lists/*
-
-RUN python3 -m venv $VENV_PATH && \
-    python -m pip install --upgrade pip
-
+RUN python3 -m venv --without-pip $VENV_PATH && \
+    wget -qO- https://bootstrap.pypa.io/get-pip.py | $VENV_PATH/bin/python && \
+    $VENV_PATH/bin/pip install --upgrade pip
 RUN CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@latest && \
     CGO_ENABLED=1 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && \
     CGO_ENABLED=1 go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
-
-# Install Python packages into the virtualenv (no system-wide flags)
-RUN pip install --no-cache-dir \
-      jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder setuptools wheel && \
-    pip install --no-cache-dir \
+RUN $VENV_PATH/bin/pip install --no-cache-dir \
+      jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder setuptools wheel uploadserver && \
+    $VENV_PATH/bin/pip install --no-cache-dir \
       git+https://github.com/Tib3rius/AutoRecon.git
-
-# run nuclei template update (nuclei installed via go)
 RUN nuclei -ut || true
-
-# Configure npm then install retire-site-scanner
 RUN npm config set progress false && \
     npm config set audit false && \
     npm config set fund false && \
     npm install -g --no-audit --no-fund --unsafe-perm retire-site-scanner
-
 RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
-
 RUN updatedb
-
 WORKDIR /root
 CMD ["zsh"]

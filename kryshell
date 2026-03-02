@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Ensure engagement name is provided
+if [ -z "$1" ]; then
+    echo "Usage: kryshell <engagement-name>"
+    exit 1
+fi
+
+container="kryten-$1"
+
+sudo docker exec -it "$container" zsh
