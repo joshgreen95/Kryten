@@ -44,6 +44,7 @@ RUN apt-get update && \
       man-db \
       locate \
       less \
+      ntpsec-ntpdate \
     && apt-get --fix-broken -y install \
     && rm -rf /var/lib/apt/lists/*
 RUN python3 -m venv --without-pip $VENV_PATH && \
@@ -53,7 +54,7 @@ RUN CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@lates
     CGO_ENABLED=1 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && \
     CGO_ENABLED=1 go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
 RUN $VENV_PATH/bin/pip install --no-cache-dir \
-      jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder setuptools wheel uploadserver && \
+      jwt aardwolf websockets wappalyzer bloodyAD aioquic netifaces metafinder setuptools wheel uploadserver setuptools==66.1.1 && \
     $VENV_PATH/bin/pip install --no-cache-dir \
       git+https://github.com/Tib3rius/AutoRecon.git
 RUN nuclei -ut || true
