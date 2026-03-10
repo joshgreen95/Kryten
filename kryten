@@ -3,9 +3,8 @@
 ### TODO: MAKE
 
 # Check for root privs
-if [ "$(id -u)" -ne 0 ]; then
-    echo "Error: kryten requires sudo privileges" >&2
-    exit 1
+if [ "$EUID" -ne 0 ]; then
+    exec sudo "$0" "$@"
 fi
 
 getRandomPhrase() {
@@ -75,8 +74,7 @@ checkRunningContainer() {
         echo -e "\033[33mWarning: A stopped kryten container named '${container_name}' exists\033[0m" >&2
         read -p "Do you want to remove it and continue? (y/N) " answer
         if [[ "${answer}" != "y" && "${answer}" != "Y" ]]; then
-            docker rmi --force "${container_name}"
-            exit 1
+            exit 1                                  
         fi
         docker rm "${container_name}" >/dev/null
     fi
@@ -93,7 +91,7 @@ kryten() {
     local output_dir="${engagement_dir}/${engagement_name}"
 
     local script_dir
-    script_dir=$(dirname "$0")
+    script_dir=$(dirname "$(realpath "$0")")
 
     local zip_file="${engagement_dir}/archive/${engagement_name}.zip"
 
