@@ -44,11 +44,13 @@ RUN apt-get update && \
       man-db \
       locate \
       less \
+      tigervnc-viewer \
       apktool \
       apksigner \
       sharpshooter \
       ntpsec-ntpdate \
       bloodhound-ce-python \
+      mono-devel \
       ripgrep \
     && apt-get --fix-broken -y install \
     && rm -rf /var/lib/apt/lists/*
