@@ -4,7 +4,7 @@
 # Recommended cron: 0 0 * * * /path/to/this/script.sh
 
 # Configuration
-URM_ARCHIVE_DIR="/home/josh/URM/archive"
+URM_ARCHIVE_DIR="/home/josh/archive"
 MAX_AGE_DAYS=90
 
 if [ ! -d "$URM_ARCHIVE_DIR" ]; then
