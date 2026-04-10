@@ -61,15 +61,33 @@ RUN CGO_ENABLED=1 go install github.com/projectdiscovery/katana/cmd/katana@lates
     CGO_ENABLED=1 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && \
     CGO_ENABLED=1 go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
 RUN $VENV_PATH/bin/pip install --no-cache-dir \
-      jwt aardwolf websockets wappalyzer jsbeautifier bloodyAD rich aioquic netifaces metafinder setuptools wheel uploadserver setuptools==66.1.1 && \
+      jwt aardwolf websockets wappalyzer jsbeautifier bloodyAD rich aioquic netifaces metafinder setuptools wheel playwright uploadserver setuptools==66.1.1 && \
     $VENV_PATH/bin/pip install --no-cache-dir \
       git+https://github.com/Tib3rius/AutoRecon.git
 RUN nuclei -ut || true
 RUN npm config set progress false && \
     npm config set audit false && \
     npm config set fund false && \
-    npm install -g --no-audit --no-fund --unsafe-perm retire-site-scanner
+    npm install -g --no-audit --no-fund --unsafe-perm retire
 RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
 RUN updatedb
+RUN playwright install
+
+# AdaptixC2 Installation
+RUN mkdir -p /root/.Adaptix && \
+    git clone https://github.com/Adaptix-Framework/AdaptixC2 /root/.Adaptix/AdaptixC2 && \
+    git clone https://github.com/Adaptix-Framework/Extension-Kit /root/.Adaptix/AdaptixC2/Extension-Kit && \
+    cd /root/.Adaptix/AdaptixC2 && \
+    chmod +x pre_install_linux_all.sh && \
+    ./pre_install_linux_all.sh all && \
+    make all && \
+    cd Extension-Kit && \
+    make && \
+    cd /root/.Adaptix/AdaptixC2/dist && \
+    chmod +x ssl_gen.sh && \
+    printf '\n\n\n\n\n\n\n' | ./ssl_gen.sh && \
+    ln -sf /root/.Adaptix/AdaptixC2/dist/adaptixserver /usr/local/bin/adaptixserver && \
+    ln -sf /root/.Adaptix/AdaptixC2/dist/AdaptixClient /usr/local/bin/AdaptixClient
+    
 WORKDIR /root
 CMD ["zsh"]
