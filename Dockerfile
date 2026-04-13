@@ -5,8 +5,11 @@ ENV GOBIN=/usr/local/bin
 ENV PATH=$VENV_PATH/bin:$GOBIN:$PATH
 ENV NPM_CONFIG_UNSAFE_PERM=true
 ENV CGO_ENABLED=1
-RUN apt-get update && \
-    apt-get -y install --no-install-recommends \
+RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80retries && \
+    apt-get update && \
+    apt-get -y install --no-install-recommends --fix-missing \
+      openssl \
+      libssl-dev \
       kali-linux-headless \
       zsh \
       zsh-syntax-highlighting \
@@ -44,6 +47,7 @@ RUN apt-get update && \
       man-db \
       locate \
       less \
+      wireshark \
       tigervnc-viewer \
       apktool \
       apksigner \
@@ -69,6 +73,7 @@ RUN npm config set progress false && \
     npm config set audit false && \
     npm config set fund false && \
     npm install -g --no-audit --no-fund --unsafe-perm retire
+RUN sed -i 's/^config_diagnostics = 1/config_diagnostics = 0/' /etc/ssl/openssl.cnf
 RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
 RUN updatedb
 RUN playwright install
