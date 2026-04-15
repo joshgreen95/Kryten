@@ -72,7 +72,8 @@ RUN nuclei -ut || true
 RUN npm config set progress false && \
     npm config set audit false && \
     npm config set fund false && \
-    npm install -g --no-audit --no-fund --unsafe-perm retire
+    npm install -g --no-audit --no-fund --unsafe-perm retire-site-scanner \
+    npm install -g --no-audit --no-fund --unsafe-perm retire \
 RUN sed -i 's/^config_diagnostics = 1/config_diagnostics = 0/' /etc/ssl/openssl.cnf
 RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
 RUN updatedb
